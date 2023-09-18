@@ -1,9 +1,8 @@
 import React from 'react'
 import Card from './shared/Card'
-import { useState } from 'react'
+import { useState, useContext, useEffect } from 'react'
 import Button from './shared/Button'
 import RatingSelect from './RatingSelect'
-import { useContext } from 'react'
 import FeedbackContext from '../context/FeedbackContext'
 
 function FeedbackForm() {
@@ -13,7 +12,16 @@ function FeedbackForm() {
     const [message, setMessage] = useState('')
     const [rating, setRating] = useState(10)
 
-    const {addFeedback} = useContext(FeedbackContext)
+    const {addFeedback, feedbackEdit, updateFeedback} = useContext(FeedbackContext)
+
+    // runs when feedback edit button is clicked/when feedbackEdit is called (second argument) it will update then the form with the data of the item in the feedbackEdit state (item object). This works only for the text. The rating will be within the state but it will not be visually updated because RatingSelect is in another component. We need to handle this there.
+    useEffect(() => {
+        if(feedbackEdit.edit === true ){
+            setBtnDisabled(false)
+            setText(feedbackEdit.item.text)
+            setRating(feedbackEdit.item.rating)
+        }
+    }, [feedbackEdit])
 
     const handleTextChange = (e) => {
         if(text === ''){
@@ -37,8 +45,11 @@ const handleSubmit = (e) => {
             rating
         }
 
-        addFeedback(newFeedback)
-
+        if(feedbackEdit.edit === true) {
+            updateFeedback(feedbackEdit.item.id, newFeedback)
+        } else {
+            addFeedback(newFeedback)
+        }
         setText('')
     }
 }
